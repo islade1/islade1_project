@@ -36,20 +36,10 @@ resource "aws_instance" "Jenkins" {
   ami                    = data.aws_ami.Latest_Ubuntu.id # Ubuntu 20.04 LTS AMI
   instance_type          = "t2.micro"
   vpc_security_group_ids = [aws_security_group.allow_ports.id] # Attach Security Group
-  user_data              = <<EOF
-#!/bin/bash
-sudo apt update
-sudo apt install openjdk-8-jdk
-wget -q -O - https://pkg.jenkins.io/debian-stable/jenkins.io.key | sudo apt-key add -
-sudo sh -c 'echo deb http://pkg.jenkins.io/debian-stable binary/ > /etc/apt/sources.list.d/jenkins.list'
-sudo apt update
-sudo apt install jenkins
-sudo systemctl start jenkins
-sudo ufw allow OpenSSH
-sudo ufw enable
-sudo ufw allow 8080
-sudo cat /var/lib/jenkins/secrets/initialAdminPassword
-EOF
+  user_data              = file("jenkins.bash")                # Execute script on AWS instance
+  tags = {
+    Name = "Jenkins" # Name tag for Ubuntu Environment in AWS
+  }
 }
 
 # Creating AWS instances on Ubuntu for Apache WebServer
@@ -58,30 +48,20 @@ resource "aws_instance" "Test_Env" {
   ami                    = data.aws_ami.Latest_Ubuntu.id
   instance_type          = "t2.micro"
   vpc_security_group_ids = [aws_security_group.allow_ports.id]
-  user_data              = <<EOF
-#!/bin/bash
-sudo apt update
-sudo apt install apache2
-sudo ufw allow OpenSSH
-sudo ufw enable
-sudo ufw allow 'Apache'
-sudo systemctl status apache2
-EOF
+  user_data              = file("apache.bash")
+  tags = {
+    Name = "Test_Env"
+  }
 }
 
 resource "aws_instance" "Prod_Env" {
   ami                    = data.aws_ami.Latest_Ubuntu.id
   instance_type          = "t2.micro"
   vpc_security_group_ids = [aws_security_group.allow_ports.id]
-  ser_data               = <<EOF
-#!/bin/bash
-sudo apt update
-sudo apt install apache2
-sudo ufw allow OpenSSH
-sudo ufw enable
-sudo ufw allow 'Apache'
-sudo systemctl status apache2
-EOF
+  user_data              = file("apache.bash")
+  tags = {
+    Name = "Prod_Env"
+  }
 }
 
 # Security group

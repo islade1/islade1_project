@@ -3,7 +3,8 @@
 ## Terraform ##
 
 1. С помощью Terraform получаем доступ к AWS; 
-``` provider "aws" {
+``` 
+provider "aws" {
   profile = "iSlade1"
   region  = "eu-central-1"
 }
